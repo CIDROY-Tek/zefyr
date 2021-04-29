@@ -155,12 +155,7 @@ class _ZefyrLineState extends State<ZefyrLine> {
     EmbedNode node = widget.node.children.single;
     EmbedAttribute embed = node.style.get(NotusAttribute.embed);
 
-    if (embed == null) {
-      return ZefyrRichText(
-        node: widget.node,
-        text: buildText(context),
-      );
-    }
+    embed ??= EmbedAttribute.horizontalRule();
     if (embed.type == EmbedType.horizontalRule) {
       return ZefyrHorizontalRule(node: node);
     } else if (embed.type == EmbedType.image) {
