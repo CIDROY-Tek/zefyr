@@ -27,8 +27,7 @@ RenderEditableBox _getEditableBox(HitTestResult result) {
 
 /// Selection overlay controls selection handles and other gestures.
 class ZefyrSelectionOverlay extends StatefulWidget {
-  const ZefyrSelectionOverlay({Key key, @required this.controls})
-      : super(key: key);
+  const ZefyrSelectionOverlay({Key key, @required this.controls}) : super(key: key);
 
   final TextSelectionControls controls;
 
@@ -36,14 +35,12 @@ class ZefyrSelectionOverlay extends StatefulWidget {
   ZefyrSelectionOverlayState createState() => ZefyrSelectionOverlayState();
 }
 
-class ZefyrSelectionOverlayState extends State<ZefyrSelectionOverlay>
-    implements TextSelectionDelegate {
+class ZefyrSelectionOverlayState extends State<ZefyrSelectionOverlay> implements TextSelectionDelegate {
   TextSelectionControls _controls;
 
   TextSelectionControls get controls => _controls;
 
-  final ClipboardStatusNotifier _clipboardStatus =
-      kIsWeb ? null : ClipboardStatusNotifier();
+  final ClipboardStatusNotifier _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   /// Global position of last TapDown event.
   Offset _lastTapDownPosition;
@@ -94,8 +91,7 @@ class ZefyrSelectionOverlayState extends State<ZefyrSelectionOverlay>
   bool get isToolbarHidden => _toolbar == null;
 
   @override
-  TextEditingValue get textEditingValue =>
-      _scope.controller.plainTextEditingValue;
+  TextEditingValue get textEditingValue => _scope.controller.plainTextEditingValue;
 
   @override
   set textEditingValue(TextEditingValue value) {
@@ -103,9 +99,7 @@ class ZefyrSelectionOverlayState extends State<ZefyrSelectionOverlay>
     final oldText = _scope.controller.document.toPlainText();
     final newText = value.text;
     final diff = fastDiff(oldText, newText, cursorPosition);
-    _scope.controller.replaceText(
-        diff.start, diff.deleted.length, diff.inserted,
-        selection: value.selection);
+    _scope.controller.replaceText(diff.start, diff.deleted.length, diff.inserted, selection: value.selection);
   }
 
   @override
@@ -114,7 +108,7 @@ class ZefyrSelectionOverlayState extends State<ZefyrSelectionOverlay>
   }
 
   @override
-  void hideToolbar() {
+  void hideToolbar([bool hideHandles = true]) {
     _didCaretTap = false; // reset double tap.
     _toolbar?.remove();
     _toolbar = null;
@@ -318,6 +312,11 @@ class ZefyrSelectionOverlayState extends State<ZefyrSelectionOverlay>
 
   @override
   bool get selectAllEnabled => _scope.mode.canSelect;
+
+  @override
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+    // TODO: implement userUpdateTextEditingValue
+  }
 }
 
 enum _SelectionHandlePosition { base, extent }
@@ -337,8 +336,7 @@ class SelectionHandleDriver extends StatefulWidget {
   _SelectionHandleDriverState createState() => _SelectionHandleDriverState();
 }
 
-class _SelectionHandleDriverState extends State<SelectionHandleDriver>
-    with SingleTickerProviderStateMixin {
+class _SelectionHandleDriverState extends State<SelectionHandleDriver> with SingleTickerProviderStateMixin {
   ZefyrScope _scope;
 
   /// Current document selection.
@@ -352,8 +350,7 @@ class _SelectionHandleDriverState extends State<SelectionHandleDriver>
   ///
   /// For base handle this equals to [TextSelection.baseOffset] and for
   /// extent handle - [TextSelection.extentOffset].
-  int get documentOffset =>
-      isBaseHandle ? selection.baseOffset : selection.extentOffset;
+  int get documentOffset => isBaseHandle ? selection.baseOffset : selection.extentOffset;
 
   List<TextSelectionPoint> getEndpointsForSelection(RenderEditableBox block) {
     if (block == null) return null;
@@ -416,24 +413,20 @@ class _SelectionHandleDriverState extends State<SelectionHandleDriver>
     // we invert base / extend if the selection is from bottom to top
     var pos = widget.position;
     if (selection.baseOffset > selection.extentOffset) {
-      pos = pos == _SelectionHandlePosition.base
-          ? _SelectionHandlePosition.extent
-          : _SelectionHandlePosition.base;
+      pos = pos == _SelectionHandlePosition.base ? _SelectionHandlePosition.extent : _SelectionHandlePosition.base;
     }
 
     switch (pos) {
       case _SelectionHandlePosition.base:
         point = endpoints[0].point;
-        type = _chooseType(endpoints[0], TextSelectionHandleType.left,
-            TextSelectionHandleType.right);
+        type = _chooseType(endpoints[0], TextSelectionHandleType.left, TextSelectionHandleType.right);
         break;
       case _SelectionHandlePosition.extent:
         // [endpoints] will only contain 1 point for collapsed selections, in
         // which case we shouldn't be building the [end] handle.
         assert(endpoints.length == 2);
         point = endpoints[1].point;
-        type = _chooseType(endpoints[1], TextSelectionHandleType.right,
-            TextSelectionHandleType.left);
+        type = _chooseType(endpoints[1], TextSelectionHandleType.right, TextSelectionHandleType.left);
         break;
     }
 
@@ -460,8 +453,7 @@ class _SelectionHandleDriverState extends State<SelectionHandleDriver>
 
     // Make sure the GestureDetector is big enough to be easily interactive.
     final interactiveRect = handleRect.expandToInclude(
-      Rect.fromCircle(
-          center: handleRect.center, radius: kMinInteractiveDimension / 2),
+      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension / 2),
     );
     final padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
@@ -534,15 +526,10 @@ class _SelectionHandleDriverState extends State<SelectionHandleDriver>
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _dragCurrentParagraph =
-        _scope.renderContext.boxForTextOffset(documentOffset);
+    _dragCurrentParagraph = _scope.renderContext.boxForTextOffset(documentOffset);
     _dragPosition = Platform.isAndroid
         ? details.globalPosition -
-            Offset(
-                0,
-                widget.selectionOverlay.controls
-                    .getHandleSize(_dragCurrentParagraph.preferredLineHeight)
-                    .height)
+            Offset(0, widget.selectionOverlay.controls.getHandleSize(_dragCurrentParagraph.preferredLineHeight).height)
         : details.globalPosition;
   }
 
@@ -567,20 +554,17 @@ class _SelectionHandleDriverState extends State<SelectionHandleDriver>
   Offset _getLocalPointFromDragDetails(DragUpdateDetails details) {
     // Keep track of the handle size adjusted position (Android only)
     _dragPosition += details.delta;
-    RenderEditableBox paragraph =
-        _scope.renderContext.boxForGlobalPoint(_dragPosition);
+    RenderEditableBox paragraph = _scope.renderContext.boxForGlobalPoint(_dragPosition);
     // When dragging outside a paragraph, user expects dragging to
     // capture horizontal component of movement
     if (paragraph == null) {
       paragraph = _dragCurrentParagraph;
       var effectiveGlobalPoint = paragraph.localToGlobal(Offset.zero);
       if (_dragPosition.dy > paragraph.localToGlobal(Offset.zero).dy) {
-        effectiveGlobalPoint = Offset(
-            _dragPosition.dx, effectiveGlobalPoint.dy + paragraph.size.height);
+        effectiveGlobalPoint = Offset(_dragPosition.dx, effectiveGlobalPoint.dy + paragraph.size.height);
       }
       if (_dragPosition.dy < paragraph.localToGlobal(Offset.zero).dy) {
-        effectiveGlobalPoint =
-            Offset(_dragPosition.dx, effectiveGlobalPoint.dy);
+        effectiveGlobalPoint = Offset(_dragPosition.dx, effectiveGlobalPoint.dy);
       }
       return paragraph.globalToLocal(effectiveGlobalPoint);
     }
@@ -608,8 +592,7 @@ class _SelectionToolbarState extends State<_SelectionToolbar> {
 
   ZefyrScope get scope => widget.selectionOverlay.scope;
 
-  TextSelection get selection =>
-      widget.selectionOverlay.textEditingValue.selection;
+  TextSelection get selection => widget.selectionOverlay.textEditingValue.selection;
 
   @override
   Widget build(BuildContext context) {
@@ -629,20 +612,16 @@ class _SelectionToolbarState extends State<_SelectionToolbar> {
 
     // Find the horizontal midpoint, just above the selected text.
     var midpoint = Offset(
-      (boxes.length == 1)
-          ? (boxes[0].start + boxes[0].end) / 2.0
-          : (boxes[0].start + boxes[1].start) / 2.0,
+      (boxes.length == 1) ? (boxes[0].start + boxes[0].end) / 2.0 : (boxes[0].start + boxes[1].start) / 2.0,
       boxes[0].bottom - block.preferredLineHeight,
     );
     List<TextSelectionPoint> endpoints;
     if (boxes.length == 1) {
-      midpoint = Offset((boxes[0].start + boxes[0].end) / 2.0,
-          boxes[0].bottom - block.preferredLineHeight);
+      midpoint = Offset((boxes[0].start + boxes[0].end) / 2.0, boxes[0].bottom - block.preferredLineHeight);
       final start = Offset(boxes[0].start, block.preferredLineHeight);
       endpoints = <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
-      midpoint = Offset((boxes[0].start + boxes[1].start) / 2.0,
-          boxes[0].bottom - block.preferredLineHeight);
+      midpoint = Offset((boxes[0].start + boxes[1].start) / 2.0, boxes[0].bottom - block.preferredLineHeight);
       final start = Offset(boxes.first.start, boxes.first.bottom);
       final end = Offset(boxes.last.end, boxes.last.bottom);
       endpoints = <TextSelectionPoint>[
